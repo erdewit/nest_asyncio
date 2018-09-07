@@ -1,7 +1,7 @@
 |Status| |PyPiVersion| |License|
 
 Introduction
-============
+------------
 
 By design asyncio `does not allow <https://bugs.python.org/issue22239>`_
 its event loop to be nested. This presents a practical problem:
