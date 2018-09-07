@@ -8,7 +8,7 @@ its event loop to be nested. This presents a practical problem:
 When in an environment were the event loop is
 already running it's impossible to run tasks and wait
 for the result. Trying to do so will give the error
-``RuntimeError: This event loop is already running``.
+"``RuntimeError: This event loop is already running``".
 
 The issue pops up various environments, such as web servers, GUI applications
 and in Jupyter notebooks.
@@ -23,7 +23,7 @@ Installation
 
     pip3 install nest_asyncio
     
-    Python 3.5 or higher is required.
+Python 3.5 or higher is required.
 
 Usage
 -----
@@ -34,9 +34,9 @@ Usage
     nest_asyncio.apply()
     
 
-.. |PyPiVersion| image:: https://img.shields.io/pypi/v/ib_insync.svg
+.. |PyPiVersion| image:: https://img.shields.io/pypi/v/nest_asyncio.svg
    :alt: PyPi
-   :target: https://pypi.python.org/pypi/ib_insync
+   :target: https://pypi.python.org/pypi/nest_asyncio
 
 .. |Status| image:: https://img.shields.io/badge/status-beta-green.svg
    :alt:
