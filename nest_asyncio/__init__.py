@@ -52,7 +52,7 @@ def apply(loop=None):
                 asyncio.tasks._PyTask
         asyncio.Future = asyncio.futures._CFuture = asyncio.futures.Future = \
                 asyncio.futures._PyFuture
-    if sys.version_info <= (3, 7, 0):
+    if sys.version_info < (3, 7, 0):
         asyncio.tasks._current_tasks = asyncio.tasks.Task._current_tasks  # noqa
     if not hasattr(asyncio, '_run_orig'):
         asyncio._run_orig = getattr(asyncio, 'run', None)
