@@ -10,10 +10,10 @@ already running it's impossible to run tasks and wait
 for the result. Trying to do so will give the error
 "``RuntimeError: This event loop is already running``".
 
-The issue pops up various environments, such as web servers, GUI applications
+The issue pops up in various environments, such as web servers, GUI applications
 and in Jupyter notebooks.
 
-This package will patch asyncio to allow nested use of ``asyncio.run`` and
+This module patches asyncio to allow nested use of ``asyncio.run`` and
 ``loop.run_until_complete``. 
 
 Installation
@@ -32,7 +32,7 @@ Usage
 
     import nest_asyncio
     nest_asyncio.apply()
-    
+
 
 .. |PyPiVersion| image:: https://img.shields.io/pypi/v/nest_asyncio.svg
    :alt: PyPi
