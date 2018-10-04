@@ -49,9 +49,9 @@ def apply(loop=None):
     if sys.version_info[:2] == (3, 6):
         # use pure python tasks and futures
         asyncio.Task = asyncio.tasks._CTask = asyncio.tasks.Task = \
-                asyncio.tasks._PyTask
+            asyncio.tasks._PyTask
         asyncio.Future = asyncio.futures._CFuture = asyncio.futures.Future = \
-                asyncio.futures._PyFuture
+            asyncio.futures._PyFuture
     if sys.version_info < (3, 7, 0):
         asyncio.tasks._current_tasks = asyncio.tasks.Task._current_tasks  # noqa
     if not hasattr(asyncio, '_run_orig'):
