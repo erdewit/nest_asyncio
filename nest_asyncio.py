@@ -21,21 +21,28 @@ def run_until_complete(self, future):
 
 def run_until_complete_nested(self, future):
     self._check_closed()
-    preserved_ready = list(self._ready)
-    self._ready.clear()
-    f = asyncio.ensure_future(future)
-    if f is not future:
-        f._log_destroy_pending = False
-    current_tasks = asyncio.tasks._current_tasks  # noqa
-    preserved_task = current_tasks.pop(self, None)
-    while not f.done():
-        self._run_once()
-        if self._stopping:
-            break
-    self._ready.extendleft(reversed(preserved_ready))
-    if preserved_task is not None:
-        current_tasks[self] = preserved_task
-    return f.result()
+    if future in asyncio.Task.all_tasks(self):
+        # future is already submitted, loop until it's done while
+        # prodding the event loop with call_later to keep it spinning
+        while not future.done():
+            self.call_later(0.01, lambda: None)
+            self._run_once()
+        result = future.result()
+    else:
+        preserved_ready = list(self._ready)
+        self._ready.clear()
+        f = asyncio.ensure_future(future)
+        if f is not future:
+            f._log_destroy_pending = False
+        current_tasks = asyncio.tasks._current_tasks  # noqa
+        preserved_task = current_tasks.pop(self, None)
+        while not f.done():
+            self._run_once()
+        self._ready.extendleft(reversed(preserved_ready))
+        if preserved_task is not None:
+            current_tasks[self] = preserved_task
+        result = f.result()
+    return result
 
 
 def apply(loop=None):
