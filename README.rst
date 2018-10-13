@@ -1,4 +1,4 @@
-|Status| |PyPiVersion| |License|
+|Build| |Status| |PyPiVersion| |License|
 
 Introduction
 ------------
@@ -14,7 +14,7 @@ The issue pops up in various environments, such as web servers, GUI applications
 and in Jupyter notebooks.
 
 This module patches asyncio to allow nested use of ``asyncio.run`` and
-``loop.run_until_complete``. 
+``loop.run_until_complete``.
 
 Installation
 ------------
@@ -22,7 +22,7 @@ Installation
 .. code-block::
 
     pip3 install nest_asyncio
-    
+
 Python 3.5 or higher is required.
 
 Usage
@@ -33,6 +33,9 @@ Usage
     import nest_asyncio
     nest_asyncio.apply()
 
+.. |Build| image:: https://travis-ci.org/erdewit/nest_asyncio.svg?branch=master
+   :alt: Build
+   :target: https://travis-ci.org/erdewit/nest_asyncio
 
 .. |PyPiVersion| image:: https://img.shields.io/pypi/v/nest_asyncio.svg
    :alt: PyPi

@@ -1,6 +1,5 @@
 import sys
 import asyncio
-from asyncio import format_helpers
 import heapq
 
 
@@ -158,4 +157,5 @@ def _patch_handle():
         self = None
 
     if sys.version_info >= (3, 7, 0):
+        from asyncio import format_helpers
         asyncio.events.Handle._run = run
