@@ -145,7 +145,7 @@ def _patch_handle():
         except Exception as exc:
             cb = format_helpers._format_callback_source(
                 self._callback, self._args)
-            msg = f'Exception in callback {cb}'
+            msg = 'Exception in callback {}'.format(cb)
             context = {
                 'message': msg,
                 'exception': exc,
