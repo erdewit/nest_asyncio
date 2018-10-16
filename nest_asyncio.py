@@ -97,6 +97,7 @@ def _patch_loop(loop):
     cls = loop.__class__
     cls._run_until_complete_orig = cls.run_until_complete
     cls.run_until_complete = run_until_complete
+    cls._run_once = run_once
     loop._num_handles_todo = 0
 
 
