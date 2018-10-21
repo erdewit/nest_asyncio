@@ -60,12 +60,11 @@ def _patch_loop(loop):
         else:
             return self._run_until_complete_orig(future)
 
+    bogus_handle = asyncio.Handle(None, None, loop)
+    bogus_handle.cancel()
+
     def run_once(self):
-        self._nesting_level += 1
-        if self._nesting_level == 1:
-            handle = asyncio.Handle(None, None, self)
-            handle.cancel()
-            self._bogus_handles = [handle] * len(self._ready)
+        nready = len(self._ready)
 
         while self._scheduled and self._scheduled[0]._cancelled:
             self._timer_cancelled_count -= 1
@@ -91,26 +90,26 @@ def _patch_loop(loop):
             handle._scheduled = False
             self._ready.append(handle)
 
-        self._num_handles_todo += len(self._ready)
-        while self._num_handles_todo:
-            self._num_handles_todo -= 1
+        self._nesting_level += 1
+        ntodo = len(self._ready)
+        for _ in range(ntodo):
+            if not self._ready:
+                break
             handle = self._ready.popleft()
             if handle._cancelled:
                 continue
             handle._run()
         handle = None
-
         self._nesting_level -= 1
+
+        # add bogus handles to keep loop._run_once happy
         if self._nesting_level == 0:
-            # add bogus handles to keep loop._run_once happy
-            self._ready.extend(self._bogus_handles)
+            self._ready.extend([bogus_handle] * nready)
 
     cls = loop.__class__
     cls._run_until_complete_orig = cls.run_until_complete
     cls.run_until_complete = run_until_complete
-    loop._num_handles_todo = 0
     loop._nesting_level = 0
-    loop._bogus_handles = []
 
 
 def _patch_task():
