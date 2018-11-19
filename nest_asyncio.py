@@ -109,7 +109,7 @@ def _patch_loop(loop):
     cls = loop.__class__
     cls._run_until_complete_orig = cls.run_until_complete
     cls.run_until_complete = run_until_complete
-    loop._nesting_level = 0
+    cls._nesting_level = 0
 
 
 def _patch_task():
