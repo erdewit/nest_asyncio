@@ -8,7 +8,7 @@ with codecs.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='nest_asyncio',
-    version='0.9.7',
+    version='0.9.8',
     description='Patch asyncio to allow nested event loops',
     long_description=long_description,
     url='https://github.com/erdewit/nest_asyncio',
