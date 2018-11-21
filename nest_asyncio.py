@@ -64,38 +64,44 @@ def _patch_loop(loop):
     bogus_handle.cancel()
 
     def run_once(self):
-        nready = len(self._ready)
+        ready = self._ready
+        scheduled = self._scheduled
 
-        while self._scheduled and self._scheduled[0]._cancelled:
+        # remove bogus handles to get more efficient timeout
+        while ready and ready[0] is bogus_handle:
+            ready.popleft()
+        nready = len(ready)
+
+        while scheduled and scheduled[0]._cancelled:
             self._timer_cancelled_count -= 1
-            handle = heapq.heappop(self._scheduled)
+            handle = heapq.heappop(scheduled)
             handle._scheduled = False
 
         timeout = None
-        if self._ready or self._stopping:
+        if ready or self._stopping:
             timeout = 0
-        elif self._scheduled:
-            when = self._scheduled[0]._when
+        elif scheduled:
+            when = scheduled[0]._when
             timeout = max(0, when - self.time())
 
         event_list = self._selector.select(timeout)
         self._process_events(event_list)
 
         end_time = self.time() + self._clock_resolution
-        while self._scheduled:
-            handle = self._scheduled[0]
+        while scheduled:
+            handle = scheduled[0]
             if handle._when >= end_time:
                 break
-            handle = heapq.heappop(self._scheduled)
+            handle = heapq.heappop(scheduled)
             handle._scheduled = False
-            self._ready.append(handle)
+            ready.append(handle)
 
         self._nesting_level += 1
-        ntodo = len(self._ready)
+        ntodo = len(ready)
         for _ in range(ntodo):
-            if not self._ready:
+            if not ready:
                 break
-            handle = self._ready.popleft()
+            handle = ready.popleft()
             if handle._cancelled:
                 continue
             handle._run()
@@ -103,8 +109,8 @@ def _patch_loop(loop):
         self._nesting_level -= 1
 
         # add bogus handles to keep loop._run_once happy
-        if self._nesting_level == 0:
-            self._ready.extend([bogus_handle] * nready)
+        if nready and self._nesting_level == 0:
+            ready.extend([bogus_handle] * nready)
 
     cls = loop.__class__
     cls._run_until_complete_orig = cls.run_until_complete
