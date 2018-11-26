@@ -110,7 +110,7 @@ def _patch_loop(loop):
 
         # add bogus handles to keep loop._run_once happy
         if nready and self._nesting_level == 0:
-            ready.extend([bogus_handle] * nready)
+            ready.extendleft([bogus_handle] * nready)
 
     cls = loop.__class__
     cls._run_until_complete_orig = cls.run_until_complete
