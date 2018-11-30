@@ -62,10 +62,13 @@ class NestTest(unittest.TestCase):
     def test_timeout(self):
 
         async def f1():
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.1)
+
+        async def f2():
+            asyncio.run(asyncio.wait_for(f1(), 0.01))
 
         with self.assertRaises(asyncio.TimeoutError):
-            asyncio.run(asyncio.wait_for(f1(), 0.01))
+            self.loop.run_until_complete(f2())
 
 
 if __name__ == '__main__':
