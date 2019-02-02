@@ -33,10 +33,12 @@ Usage
     import nest_asyncio
     nest_asyncio.apply()
 
-This can be applied both in the case where the event loop is already
-running or that it is not. Optionally the loop that needs patching can be
-given as argument to ``apply``. Only event loops from asyncio can be patched,
-loops from other projects, such as uvloop or quamash, generally can't.
+Optionally the specific loop that needs patching can be given
+as argument to ``apply``, otherwise the current event loop is used.
+An event loop can be patched whether it is already running
+or not. Only event loops from asyncio can be patched;
+Loops from other projects, such as uvloop or quamash,
+generally can't be patched.
 
 .. |Build| image:: https://travis-ci.org/erdewit/nest_asyncio.svg?branch=master
    :alt: Build
@@ -46,7 +48,7 @@ loops from other projects, such as uvloop or quamash, generally can't.
    :alt: PyPi
    :target: https://pypi.python.org/pypi/nest_asyncio
 
-.. |Status| image:: https://img.shields.io/badge/status-beta-green.svg
+.. |Status| image:: https://img.shields.io/badge/status-stable-green.svg
    :alt:
 
 .. |License| image:: https://img.shields.io/badge/license-BSD-blue.svg
