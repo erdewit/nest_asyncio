@@ -9,7 +9,7 @@ def apply(loop=None):
     """
     loop = loop or asyncio.get_event_loop()
     if not isinstance(loop, asyncio.BaseEventLoop):
-        raise ValueError(f'Can\'t patch loop of type {type(loop)}')
+        raise ValueError('Can\'t patch loop of type %s' % type(loop))
     if hasattr(loop, '_run_until_complete_orig'):
         # already patched
         return
