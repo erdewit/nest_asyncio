@@ -1,4 +1,4 @@
-|Build| |Status| |PyPiVersion| |License|
+|Build| |Status| |PyPiVersion| |License| |Downloads|
 
 Introduction
 ------------
@@ -10,8 +10,8 @@ already running it's impossible to run tasks and wait
 for the result. Trying to do so will give the error
 "``RuntimeError: This event loop is already running``".
 
-The issue pops up in various environments, such as web servers, GUI applications
-and in Jupyter notebooks.
+The issue pops up in various environments, such as web servers,
+GUI applications and in Jupyter notebooks.
 
 This module patches asyncio to allow nested use of ``asyncio.run`` and
 ``loop.run_until_complete``.
@@ -33,6 +33,11 @@ Usage
     import nest_asyncio
     nest_asyncio.apply()
 
+This can be applied both in the case where the event loop is already
+running or that it is not. Optionally the loop that needs patching can be
+given as argument to ``apply``. Only event loops from asyncio can be patched,
+loops from other projects, such as uvloop or quamash, generally can't.
+
 .. |Build| image:: https://travis-ci.org/erdewit/nest_asyncio.svg?branch=master
    :alt: Build
    :target: https://travis-ci.org/erdewit/nest_asyncio
@@ -46,4 +51,8 @@ Usage
 
 .. |License| image:: https://img.shields.io/badge/license-BSD-blue.svg
    :alt:
+
+.. |Downloads| image:: https://pepy.tech/badge/nest-asyncio/month)
+   :alt: Number of downloads
+   :target: https://pepy.tech/project/nest-asyncio
 
