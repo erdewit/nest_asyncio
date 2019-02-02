@@ -52,7 +52,7 @@ loops from other projects, such as uvloop or quamash, generally can't.
 .. |License| image:: https://img.shields.io/badge/license-BSD-blue.svg
    :alt:
 
-.. |Downloads| image:: https://pepy.tech/badge/nest-asyncio/month)
+.. |Downloads| image:: https://pepy.tech/badge/nest-asyncio/month
    :alt: Number of downloads
    :target: https://pepy.tech/project/nest-asyncio
 
