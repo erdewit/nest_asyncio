@@ -26,5 +26,6 @@ setup(
         'Programming Language :: Python :: 3 :: Only',
     ],
     keywords='asyncio nested eventloop',
-    py_modules=['nest_asyncio']
+    py_modules=['nest_asyncio'],
+    test_suite="tests"
 )
