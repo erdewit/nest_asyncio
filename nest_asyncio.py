@@ -1,7 +1,6 @@
 import sys
 import asyncio
 import asyncio.events as events
-import heapq
 import threading
 
 
@@ -48,117 +47,48 @@ def _patch_loop(loop):
     """
     Patch loop to make it reentrent.
     """
-    def run_forever_35_36(self):
-        # from Python 3.5/3.6 asyncio.base_events
-        self._check_closed()
-        old_thread_id = self._thread_id
-        old_running_loop = events._get_running_loop()
-        self._set_coroutine_wrapper(self._debug)
-        self._thread_id = threading.get_ident()
-        if self._asyncgens is not None:
-            old_agen_hooks = sys.get_asyncgen_hooks()
-            sys.set_asyncgen_hooks(firstiter=self._asyncgen_firstiter_hook,
-                                   finalizer=self._asyncgen_finalizer_hook)
-        try:
-            events._set_running_loop(self)
-            while True:
-                self._run_once()
-                if self._stopping:
-                    break
-        finally:
-            self._stopping = False
-            self._thread_id = old_thread_id
-            events._set_running_loop(old_running_loop)
-            self._set_coroutine_wrapper(False)
-            if self._asyncgens is not None:
-                sys.set_asyncgen_hooks(*old_agen_hooks)
+    if sys.version_info >= (3, 7, 0):
+        set_coro_tracking = loop._set_coroutine_origin_tracking
+    else:
+        set_coro_tracking = loop._set_coroutine_wrapper
 
-    def run_forever_37(self):
-        # from Python 3.7 asyncio.base_events
+    def run_forever(self):
         self._check_closed()
         old_thread_id = self._thread_id
         old_running_loop = events._get_running_loop()
-        self._set_coroutine_origin_tracking(self._debug)
+        set_coro_tracking(self._debug)
         self._thread_id = threading.get_ident()
 
         old_agen_hooks = sys.get_asyncgen_hooks()
-        sys.set_asyncgen_hooks(firstiter=self._asyncgen_firstiter_hook,
-                               finalizer=self._asyncgen_finalizer_hook)
+        if self._asyncgens is not None:
+            sys.set_asyncgen_hooks(
+                firstiter=self._asyncgen_firstiter_hook,
+                finalizer=self._asyncgen_finalizer_hook)
         try:
             events._set_running_loop(self)
             while True:
-                self._run_once()
+                try:
+                    self._run_once()
+                except IndexError:
+                    # Ignore 'pop from an empty deque' errors.
+                    # This happens when all ready handles have already been
+                    # processed but _run_once expects there to be more.
+                    # Since the handles have been processed anyway it is
+                    # safe to ignore this.
+                    pass
                 if self._stopping:
                     break
         finally:
             self._stopping = False
             self._thread_id = old_thread_id
             events._set_running_loop(old_running_loop)
-            self._set_coroutine_origin_tracking(False)
-            sys.set_asyncgen_hooks(*old_agen_hooks)
-
-    bogus_handle = asyncio.Handle(None, None, loop)
-    bogus_handle.cancel()
-
-    def run_once(self):
-        ready = self._ready
-        scheduled = self._scheduled
-
-        # remove bogus handles to get more efficient timeout
-        while ready and ready[0] is bogus_handle:
-            ready.popleft()
-        nready = len(ready)
-
-        while scheduled and scheduled[0]._cancelled:
-            self._timer_cancelled_count -= 1
-            handle = heapq.heappop(scheduled)
-            handle._scheduled = False
-
-        timeout = None
-        if ready or self._stopping:
-            timeout = 0
-        elif scheduled:
-            when = scheduled[0]._when
-            timeout = max(0, when - self.time())
-
-        event_list = self._selector.select(timeout)
-        self._process_events(event_list)
-
-        end_time = self.time() + self._clock_resolution
-        while scheduled:
-            handle = scheduled[0]
-            if handle._when >= end_time:
-                break
-            handle = heapq.heappop(scheduled)
-            handle._scheduled = False
-            ready.append(handle)
-
-        self._nesting_level += 1
-        ntodo = len(ready)
-        for _ in range(ntodo):
-            if not ready:
-                break
-            handle = ready.popleft()
-            if handle._cancelled:
-                continue
-            handle._run()
-        handle = None
-        self._nesting_level -= 1
-
-        if nready and self._nesting_level == 0:
-            # When the loop was patched while it was already running,
-            # there is an unpatched loop._run_once enclosing us.
-            # It expects to process 'nready' handles and will crash
-            # if there are less. # So here we feed it 'nready' bogus handles.
-            ready.extendleft([bogus_handle] * nready)
+            set_coro_tracking(False)
+            if self._asyncgens is not None:
+                sys.set_asyncgen_hooks(*old_agen_hooks)
 
     cls = loop.__class__
     cls._run_forever_orig = cls.run_forever
-    if sys.version_info >= (3, 7, 0):
-        cls.run_forever = run_forever_37
-    else:
-        cls.run_forever = run_forever_35_36
-    cls._nesting_level = 0
+    cls.run_forever = run_forever
 
 
 def _patch_task():
