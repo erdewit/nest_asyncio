@@ -59,8 +59,8 @@ def _patch_loop(loop):
         set_coro_tracking(self._debug)
         self._thread_id = threading.get_ident()
 
-        old_agen_hooks = sys.get_asyncgen_hooks()
         if self._asyncgens is not None:
+            old_agen_hooks = sys.get_asyncgen_hooks()
             sys.set_asyncgen_hooks(
                 firstiter=self._asyncgen_firstiter_hook,
                 finalizer=self._asyncgen_finalizer_hook)
