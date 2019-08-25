@@ -70,7 +70,7 @@ class NestTest(unittest.TestCase):
         with self.assertRaises(asyncio.TimeoutError):
             self.loop.run_until_complete(f2())
 
-    def test_two_run_until_completes_in_one_outer_loop(self):
+    def _test_two_run_until_completes_in_one_outer_loop(self):
 
         async def f1():
             self.loop.run_until_complete(asyncio.sleep(0.02))
