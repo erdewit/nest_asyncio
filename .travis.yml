@@ -3,10 +3,11 @@ sudo: false
 python:
   - "3.5"
   - "3.6"
-  - "3.7-dev"
+  - "3.7"
+  - "3.8"
   - "nightly"
 install:
   - pip install .
 script:
-  - python3 tests/nest_test.py 
+  - python3 tests/nest_test.py
 
