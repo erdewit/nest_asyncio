@@ -1,5 +1,7 @@
-import unittest
 import asyncio
+import sys
+import unittest
+
 import nest_asyncio
 
 
@@ -70,7 +72,7 @@ class NestTest(unittest.TestCase):
         with self.assertRaises(asyncio.TimeoutError):
             self.loop.run_until_complete(f2())
 
-    def _test_two_run_until_completes_in_one_outer_loop(self):
+    def test_two_run_until_completes_in_one_outer_loop(self):
 
         async def f1():
             self.loop.run_until_complete(asyncio.sleep(0.02))
@@ -81,8 +83,25 @@ class NestTest(unittest.TestCase):
             return 2
 
         result = self.loop.run_until_complete(
-            asyncio.gather(f1(), f2()))
+            asyncio.gather(f1(), f2(), loop=self.loop))
         self.assertEqual(result, [4, 2])
+
+    @unittest.skipIf(sys.version_info < (3, 7, 0), 'No contextvars module')
+    def test_contextvars(self):
+        from contextvars import ContextVar
+        var = ContextVar('var')
+        var.set(0)
+
+        async def set_val():
+            var.set(42)
+
+        async def coro():
+            await set_val()
+            await asyncio.sleep(0.01)
+            return var.get()
+
+        result = self.loop.run_until_complete(coro())
+        self.assertEqual(result, 42)
 
 
 if __name__ == '__main__':
