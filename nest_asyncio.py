@@ -94,7 +94,6 @@ def _patch_loop(loop):
     cls._run_once = _run_once
     cls._run_until_complete_orig = cls.run_until_complete
     cls.run_until_complete = run_until_complete
-    cls._check_running_orig = cls._check_running
     cls._check_running = _check_running
     cls._nest_patched = True
 
