@@ -95,6 +95,7 @@ def _patch_loop(loop):
     cls._run_until_complete_orig = cls.run_until_complete
     cls.run_until_complete = run_until_complete
     cls._check_running = _check_running
+    cls._check_runnung = _check_running  # typo in Python 3.7 source
     cls._nest_patched = True
 
 
