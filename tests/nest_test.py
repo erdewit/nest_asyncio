@@ -18,6 +18,7 @@ class NestTest(unittest.TestCase):
         self.loop.set_exception_handler(exception_handler)
 
     def tearDown(self):
+        self.assertIsNone(asyncio._get_running_loop())
         self.loop.close()
         del self.loop
 

@@ -45,18 +45,22 @@ def _patch_loop(loop):
     """Patch loop to make it reentrent."""
 
     def run_until_complete(self, future):
-        self._check_closed()
-        events._set_running_loop(self)
-        f = asyncio.ensure_future(future, loop=self)
-        if f is not future:
-            f._log_destroy_pending = False
-        while not f.done():
-            self._run_once()
-            if self._stopping:
-                break
-        if not f.done():
-            raise RuntimeError('Event loop stopped before Future completed.')
-        return f.result()
+        current = events._get_running_loop()
+        try:
+            self._check_closed()
+            events._set_running_loop(self)
+            f = asyncio.ensure_future(future, loop=self)
+            if f is not future:
+                f._log_destroy_pending = False
+            while not f.done():
+                self._run_once()
+                if self._stopping:
+                    break
+            if not f.done():
+                raise RuntimeError('Event loop stopped before Future completed.')
+            return f.result()
+        finally:
+            events._set_running_loop(current)
 
     def _run_once(self):
         """
