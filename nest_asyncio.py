@@ -190,7 +190,9 @@ def _patch_handle():
             ctx.run(self._callback, *self._args)
             if ctx:
                 self._context.run(update_from_context, ctx)
-        except Exception as exc:
+        except (SystemExit, KeyboardInterrupt):
+            raise
+        except BaseException as exc:
             cb = format_helpers._format_callback_source(
                 self._callback, self._args)
             msg = 'Exception in callback {}'.format(cb)
@@ -218,4 +220,4 @@ def _patch_tornado():
             import tornado.concurrent as tc
             tc.Future = asyncio.Future
             if asyncio.Future not in tc.FUTURES:
-                tc.FUTURES +=  (asyncio.Future,)
+                tc.FUTURES += (asyncio.Future,)
