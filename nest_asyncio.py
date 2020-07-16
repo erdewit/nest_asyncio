@@ -124,7 +124,7 @@ def _patch_task():
             curr_tasks[loop] = task
 
         def leave_task(loop, task):
-            del curr_tasks[loop]
+            curr_tasks.pop(loop, None)
 
         asyncio.tasks._enter_task = enter_task
         asyncio.tasks._leave_task = leave_task
