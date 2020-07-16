@@ -1,6 +1,7 @@
 import asyncio
 import asyncio.events as events
 import sys
+import threading
 from heapq import heappop
 
 
@@ -45,8 +46,39 @@ def _patch_asyncio():
 def _patch_loop(loop):
     """Patch loop to make it reentrent."""
 
+    def run_forever(self):
+        if sys.version_info >= (3, 7, 0):
+            set_coro_tracking = self._set_coroutine_origin_tracking
+        else:
+            set_coro_tracking = self._set_coroutine_wrapper
+
+        self._check_closed()
+        old_thread_id = self._thread_id
+        old_running_loop = events._get_running_loop()
+        set_coro_tracking(self._debug)
+        self._thread_id = threading.get_ident()
+
+        if self._asyncgens is not None:
+            old_agen_hooks = sys.get_asyncgen_hooks()
+            sys.set_asyncgen_hooks(
+                firstiter=self._asyncgen_firstiter_hook,
+                finalizer=self._asyncgen_finalizer_hook)
+        try:
+            events._set_running_loop(self)
+            while True:
+                self._run_once()
+                if self._stopping:
+                    break
+        finally:
+            self._stopping = False
+            self._thread_id = old_thread_id
+            events._set_running_loop(old_running_loop)
+            set_coro_tracking(False)
+            if self._asyncgens is not None:
+                sys.set_asyncgen_hooks(*old_agen_hooks)
+
     def run_until_complete(self, future):
-        current = events._get_running_loop()
+        old_running_loop = events._get_running_loop()
         try:
             self._check_closed()
             events._set_running_loop(self)
@@ -58,10 +90,11 @@ def _patch_loop(loop):
                 if self._stopping:
                     break
             if not f.done():
-                raise RuntimeError('Event loop stopped before Future completed.')
+                raise RuntimeError(
+                    'Event loop stopped before Future completed.')
             return f.result()
         finally:
-            events._set_running_loop(current)
+            events._set_running_loop(old_running_loop)
 
     def _run_once(self):
         """
@@ -97,6 +130,8 @@ def _patch_loop(loop):
     cls = loop.__class__
     cls._run_once_orig = cls._run_once
     cls._run_once = _run_once
+    cls._run_forever_orig = cls.run_forever
+    cls.run_forever = run_forever
     cls._run_until_complete_orig = cls.run_until_complete
     cls.run_until_complete = run_until_complete
     cls._check_running = _check_running
