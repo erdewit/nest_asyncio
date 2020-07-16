@@ -16,6 +16,7 @@ def apply(loop=None):
     _patch_loop(loop)
     _patch_task()
     _patch_handle()
+    _patch_tornado()
 
 
 def _patch_asyncio():
@@ -171,3 +172,15 @@ def _patch_handle():
     if sys.version_info >= (3, 7, 0):
         from asyncio import format_helpers
         events.Handle._run = run
+
+
+def _patch_tornado():
+        """
+        If tornado is imported before nest_asyncio, make tornado aware of
+        the pure-Python asyncio Future.
+        """
+        if 'tornado' in sys.modules:
+            import tornado.concurrent as tc
+            tc.Future = asyncio.Future
+            if asyncio.Future not in tc.FUTURES:
+                tc.FUTURES +=  (asyncio.Future,)
