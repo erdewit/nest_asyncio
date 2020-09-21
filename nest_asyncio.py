@@ -117,7 +117,9 @@ def _patch_loop(loop):
             handle = heappop(scheduled)
             ready.append(handle)
 
-        while ready:
+        for _ in range(len(ready)):
+            if not ready:
+                break
             handle = ready.popleft()
             if not handle._cancelled:
                 handle._run()
