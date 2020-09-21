@@ -108,7 +108,7 @@ def _patch_loop(loop):
             heappop(scheduled)
 
         timeout = 0 if ready or self._stopping \
-            else min(max(0, scheduled[0]._when - now), 10) if scheduled \
+            else min(max(0, scheduled[0]._when - now), 86400) if scheduled \
             else None
         event_list = self._selector.select(timeout)
         self._process_events(event_list)
