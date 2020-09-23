@@ -107,13 +107,17 @@ def _patch_loop(loop):
         while scheduled and scheduled[0]._cancelled:
             heappop(scheduled)
 
-        timeout = 0 if ready or self._stopping \
-            else min(max(0, scheduled[0]._when - now), 86400) if scheduled \
-            else None
+        if ready or self._stopping:
+            timeout = 0
+        elif scheduled:
+            timeout = min(max(0, scheduled[0]._when - self.time()), 86400)
+        else:
+            timeout = None
         event_list = self._selector.select(timeout)
         self._process_events(event_list)
 
-        while scheduled and scheduled[0]._when < now + self._clock_resolution:
+        end_time = self.time() + self._clock_resolution
+        while scheduled and scheduled[0]._when < end_time:
             handle = heappop(scheduled)
             ready.append(handle)
 
