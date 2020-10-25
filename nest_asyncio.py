@@ -1,5 +1,6 @@
 import asyncio
 import asyncio.events as events
+import os
 import sys
 import threading
 from heapq import heappop
@@ -107,12 +108,11 @@ def _patch_loop(loop):
         while scheduled and scheduled[0]._cancelled:
             heappop(scheduled)
 
-        if ready or self._stopping:
-            timeout = 0
-        elif scheduled:
-            timeout = min(max(0, scheduled[0]._when - self.time()), 86400)
-        else:
-            timeout = None
+        timeout = (
+            0 if ready or self._stopping
+            else min(max(0, scheduled[0]._when - now), 86400) if scheduled
+            else 0.01 if self._is_proactorloop
+            else None)
         event_list = self._selector.select(timeout)
         self._process_events(event_list)
 
@@ -143,6 +143,8 @@ def _patch_loop(loop):
     cls._check_running = _check_running
     cls._check_runnung = _check_running  # typo in Python 3.7 source
     cls._nest_patched = True
+    cls._is_proactorloop = (
+            os.name == 'nt' and issubclass(cls, asyncio.ProactorEventLoop))
 
 
 def _patch_task():
