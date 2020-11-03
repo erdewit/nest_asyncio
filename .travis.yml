@@ -5,7 +5,8 @@ python:
   - "3.6"
   - "3.7"
   - "3.8"
-  - "nightly"
+  - "3.9"
+#   - "nightly"
 install:
   - pip install .
 script:
