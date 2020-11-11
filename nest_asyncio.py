@@ -79,9 +79,11 @@ def _patch_loop(loop):
                 sys.set_asyncgen_hooks(*old_agen_hooks)
 
     def run_until_complete(self, future):
+        old_thread_id = self._thread_id
         old_running_loop = events._get_running_loop()
         try:
             self._check_closed()
+            self._thread_id = threading.get_ident()
             events._set_running_loop(self)
             f = asyncio.ensure_future(future, loop=self)
             if f is not future:
@@ -95,6 +97,7 @@ def _patch_loop(loop):
                     'Event loop stopped before Future completed.')
             return f.result()
         finally:
+            self._thread_id = old_thread_id
             events._set_running_loop(old_running_loop)
 
     def _run_once(self):
