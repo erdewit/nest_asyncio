@@ -40,9 +40,10 @@ or not. Only event loops from asyncio can be patched;
 Loops from other projects, such as uvloop or quamash,
 generally can't be patched.
 
-.. |Build| image:: https://travis-ci.org/erdewit/nest_asyncio.svg?branch=master
+
+.. |Build| image:: https://github.com/erdewit/nest_asyncio/workflows/Test/badge.svg?branche=master
    :alt: Build
-   :target: https://travis-ci.org/erdewit/nest_asyncio
+   :target: https://github.com/erdewit/nest_asyncio/actions
 
 .. |PyPiVersion| image:: https://img.shields.io/pypi/v/nest_asyncio.svg
    :alt: PyPi
