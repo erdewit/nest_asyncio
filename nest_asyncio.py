@@ -17,7 +17,6 @@ def apply(loop=None):
     _patch_asyncio()
     _patch_loop(loop)
     _patch_task()
-    _patch_handle()
     _patch_tornado()
 
 
@@ -181,45 +180,6 @@ def _patch_task():
         curr_tasks = Task._current_tasks
         step_orig = Task._step
         Task._step = step
-
-
-def _patch_handle():
-    """Patch Handle to allow recursive calls."""
-
-    def update_from_context(ctx):
-        """Copy context ctx to currently active context."""
-        for var in ctx:
-            var.set(ctx[var])
-
-    def run(self):
-        """
-        Run the callback in a sub-context, then copy any sub-context vars
-        over to the Handle's context.
-        """
-        try:
-            ctx = self._context.copy()
-            ctx.run(self._callback, *self._args)
-            if ctx:
-                self._context.run(update_from_context, ctx)
-        except (SystemExit, KeyboardInterrupt):
-            raise
-        except BaseException as exc:
-            cb = format_helpers._format_callback_source(
-                self._callback, self._args)
-            msg = 'Exception in callback {}'.format(cb)
-            context = {
-                'message': msg,
-                'exception': exc,
-                'handle': self,
-            }
-            if self._source_traceback:
-                context['source_traceback'] = self._source_traceback
-            self._loop.call_exception_handler(context)
-        self = None
-
-    if sys.version_info >= (3, 7, 0):
-        from asyncio import format_helpers
-        events.Handle._run = run
 
 
 def _patch_tornado():
