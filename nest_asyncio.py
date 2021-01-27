@@ -136,6 +136,7 @@ def _patch_loop(loop):
                 sys.set_asyncgen_hooks(
                     firstiter=self._asyncgen_firstiter_hook,
                     finalizer=self._asyncgen_finalizer_hook)
+            yield
         finally:
             self._set_coroutine_origin_tracking(False)
             if self._asyncgens is not None:
