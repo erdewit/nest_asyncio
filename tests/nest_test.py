@@ -84,7 +84,7 @@ class NestTest(unittest.TestCase):
             return 2
 
         result = self.loop.run_until_complete(
-            asyncio.gather(f1(), f2(), loop=self.loop))
+            asyncio.gather(f1(), f2()))
         self.assertEqual(result, [4, 2])
 
     @unittest.skipIf(sys.version_info < (3, 7, 0), 'No contextvars module')
