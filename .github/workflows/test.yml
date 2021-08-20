@@ -12,6 +12,11 @@ jobs:
         exclude:
           - os: windows
             python-version: pypy-3.7
+        include:
+          - os: ubuntu-latest
+            python-version: '3.10.0-alpha - 3.10.0'
+            deps: newest-deps
+            experimental: true
 
     steps:
       - uses: actions/checkout@v2
