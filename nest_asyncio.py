@@ -37,8 +37,8 @@ def _patch_asyncio():
         asyncio.Future = asyncio.futures._CFuture = asyncio.futures.Future = \
             asyncio.futures._PyFuture
     if sys.version_info < (3, 7, 0):
-        asyncio.tasks._current_tasks = asyncio.tasks.Task._current_tasks  # noqa
-        asyncio.all_tasks = asyncio.tasks.Task.all_tasks  # noqa
+        asyncio.tasks._current_tasks = asyncio.tasks.Task._current_tasks
+        asyncio.all_tasks = asyncio.tasks.Task.all_tasks
     if not hasattr(asyncio, '_run_orig'):
         asyncio._run_orig = getattr(asyncio, 'run', None)
         asyncio.run = run
@@ -74,7 +74,6 @@ def _patch_loop(loop):
         Simplified re-implementation of asyncio's _run_once that
         runs handles as they become ready.
         """
-        now = self.time()
         ready = self._ready
         scheduled = self._scheduled
         while scheduled and scheduled[0]._cancelled:
@@ -82,7 +81,8 @@ def _patch_loop(loop):
 
         timeout = (
             0 if ready or self._stopping
-            else min(max(scheduled[0]._when - now, 0), 86400) if scheduled
+            else min(max(
+                scheduled[0]._when - self.time(), 0), 86400) if scheduled
             else None)
         event_list = self._selector.select(timeout)
         self._process_events(event_list)
