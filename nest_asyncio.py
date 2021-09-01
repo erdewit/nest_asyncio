@@ -129,6 +129,9 @@ def _patch_loop(loop):
 
     @contextmanager
     def manage_asyncgens(self):
+        if not hasattr(sys, 'get_asyncgen_hooks'):
+            # Python version is too old.
+            return
         old_agen_hooks = sys.get_asyncgen_hooks()
         try:
             self._set_coroutine_origin_tracking(self._debug)
