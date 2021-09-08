@@ -165,17 +165,6 @@ def _patch_loop(loop):
 
 def _patch_task():
     """Patch the Task's step and enter/leave methods to make it reentrant."""
-
-    def step(task, exc=None):
-        curr_task = curr_tasks.get(task._loop)
-        try:
-            step_orig(task, exc)
-        finally:
-            if curr_task is None:
-                curr_tasks.pop(task._loop, None)
-            else:
-                curr_tasks[task._loop] = curr_task
-
     Task = asyncio.Task
     if sys.version_info >= (3, 7, 0):
 
@@ -188,9 +177,18 @@ def _patch_task():
         asyncio.tasks._enter_task = enter_task
         asyncio.tasks._leave_task = leave_task
         curr_tasks = asyncio.tasks._current_tasks
-        step_orig = Task._Task__step
-        Task._Task__step = step
     else:
+
+        def step(task, exc=None):
+            curr_task = curr_tasks.get(task._loop)
+            try:
+                step_orig(task, exc)
+            finally:
+                if curr_task is None:
+                    curr_tasks.pop(task._loop, None)
+                else:
+                    curr_tasks[task._loop] = curr_task
+
         curr_tasks = Task._current_tasks
         step_orig = Task._step
         Task._step = step
