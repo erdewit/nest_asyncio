@@ -3,7 +3,7 @@ import asyncio.events as events
 import os
 import sys
 import threading
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from heapq import heappop
 
 
@@ -26,10 +26,17 @@ def _patch_asyncio():
     Patch asyncio module to use pure Python tasks and futures,
     use module level _current_tasks, all_tasks and patch run method.
     """
-    def run(future, *, debug=False):
+    def run(coro, *, debug=False):
         loop = asyncio.get_event_loop()
         loop.set_debug(debug)
-        return loop.run_until_complete(future)
+        task = asyncio.ensure_future(coro)
+        try:
+            return loop.run_until_complete(task)
+        finally:
+            if not task.done():
+                task.cancel()
+                with suppress(asyncio.CancelledError):
+                    loop.run_until_complete(task)
 
     if sys.version_info >= (3, 6, 0):
         asyncio.Task = asyncio.tasks._CTask = asyncio.tasks.Task = \
