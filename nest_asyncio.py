@@ -9,7 +9,7 @@ from heapq import heappop
 
 def apply(loop=None):
     """Patch asyncio to make its event loop reentrant."""
-    loop = loop or asyncio.get_event_loop()
+    loop = loop or events._get_running_loop()
     if not isinstance(loop, asyncio.BaseEventLoop):
         raise ValueError('Can\'t patch loop of type %s' % type(loop))
     if getattr(loop, '_nest_patched', None):
@@ -26,10 +26,14 @@ def _patch_asyncio():
     Patch asyncio module to use pure Python tasks and futures,
     use module level _current_tasks, all_tasks and patch run method.
     """
-    def run(coro, *, debug=False):
-        loop = asyncio.get_event_loop()
+    def run(main, *, debug=False):
+        loop = events._get_running_loop()
+        if not loop:
+            loop = events.new_event_loop()
+            events.set_event_loop(loop)
+            _patch_loop(loop)
         loop.set_debug(debug)
-        task = asyncio.ensure_future(coro)
+        task = asyncio.ensure_future(main)
         try:
             return loop.run_until_complete(task)
         finally:
