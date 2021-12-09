@@ -9,7 +9,14 @@ from heapq import heappop
 
 def apply(loop=None):
     """Patch asyncio to make its event loop reentrant."""
-    loop = loop or asyncio.get_event_loop()
+    if loop is None:
+        if sys.version_info >= (3, 7, 0):
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+        else:
+            loop = asyncio.get_event_loop()
     if not isinstance(loop, asyncio.BaseEventLoop):
         raise ValueError('Can\'t patch loop of type %s' % type(loop))
     if getattr(loop, '_nest_patched', None):
