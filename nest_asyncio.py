@@ -23,10 +23,11 @@ def _patch_asyncio():
     use module level _current_tasks, all_tasks and patch run method.
     """
     def run(main, *, debug=False):
-        loop = events._get_running_loop()
-        if not loop:
-            loop = events.new_event_loop()
-            events.set_event_loop(loop)
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
             _patch_loop(loop)
         loop.set_debug(debug)
         task = asyncio.ensure_future(main)
