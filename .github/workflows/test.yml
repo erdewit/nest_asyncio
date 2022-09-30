@@ -1,4 +1,4 @@
-name: Test
+name: nest_asyncio
 
 on: [ push, pull_request ]
 
@@ -8,26 +8,33 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu, macos, windows]
-        python-version: [ 3.6, 3.7, 3.8, 3.9, pypy-3.7 ]
+        python-version: [ 3.6, 3.7, 3.8, 3.9, "3.10", pypy-3.9 ]
         exclude:
           - os: windows
-            python-version: pypy-3.7
-        include:
-          - os: ubuntu
-            python-version: '3.10.0-alpha - 3.10.0'
-            deps: newest-deps
-            experimental: true
+            python-version: pypy-3.9
 
     steps:
-      - uses: actions/checkout@v2
-
+      - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: pip install .
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 mypy .
 
-      - name: Unit tests
-        run: python tests/nest_test.py
+      - name: Flake8 static code analysis
+        run:
+          flake8 nest_asyncio.py
+
+      - name: MyPy static code analysis
+        run: |
+          mypy nest_asyncio.py
+
+      - name: Testsuite
+        run: |
+          python tests/nest_test.py
+
+
