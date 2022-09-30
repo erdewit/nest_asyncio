@@ -1,3 +1,5 @@
+"""Patch asyncio to allow nested event loops."""
+
 import asyncio
 import asyncio.events as events
 import os
@@ -18,10 +20,8 @@ def apply(loop=None):
 
 
 def _patch_asyncio():
-    """
-    Patch asyncio module to use pure Python tasks and futures,
-    use module level _current_tasks, all_tasks and patch run method.
-    """
+    """Patch asyncio module to use pure Python tasks and futures."""
+
     def run(main, *, debug=False):
         try:
             loop = asyncio.get_event_loop()
@@ -45,6 +45,7 @@ def _patch_asyncio():
             loop = events.get_event_loop_policy().get_event_loop()
         return loop
 
+    # Use module level _current_tasks, all_tasks and patch run method.
     if hasattr(asyncio, '_nest_patched'):
         return
     if sys.version_info >= (3, 6, 0):
@@ -180,7 +181,7 @@ def _patch_loop(loop):
     cls._check_runnung = _check_running  # typo in Python 3.7 source
     cls._num_runs_pending = 0
     cls._is_proactorloop = (
-            os.name == 'nt' and issubclass(cls, asyncio.ProactorEventLoop))
+        os.name == 'nt' and issubclass(cls, asyncio.ProactorEventLoop))
     if sys.version_info < (3, 7, 0):
         cls._set_coroutine_origin_tracking = cls._set_coroutine_wrapper
     cls._nest_patched = True
@@ -223,12 +224,12 @@ def _patch_task():
 
 
 def _patch_tornado():
-        """
-        If tornado is imported before nest_asyncio, make tornado aware of
-        the pure-Python asyncio Future.
-        """
-        if 'tornado' in sys.modules:
-            import tornado.concurrent as tc
-            tc.Future = asyncio.Future
-            if asyncio.Future not in tc.FUTURES:
-                tc.FUTURES += (asyncio.Future,)
+    """
+    If tornado is imported before nest_asyncio, make tornado aware of
+    the pure-Python asyncio Future.
+    """
+    if 'tornado' in sys.modules:
+        import tornado.concurrent as tc  # type: ignore
+        tc.Future = asyncio.Future
+        if asyncio.Future not in tc.FUTURES:
+            tc.FUTURES += (asyncio.Future,)
