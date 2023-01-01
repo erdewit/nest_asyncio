@@ -59,7 +59,6 @@ def _patch_asyncio():
     if sys.version_info >= (3, 9, 0):
         events._get_event_loop = events.get_event_loop = \
             asyncio.get_event_loop = _get_event_loop
-        _get_event_loop
     asyncio.run = run
     asyncio._nest_patched = True
 
