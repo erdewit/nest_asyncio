@@ -42,8 +42,12 @@ def _patch_asyncio():
     def _get_event_loop(stacklevel=3):
         loop = events._get_running_loop()
         if loop is None:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+            policy = events.get_event_loop_policy()
+            if policy._local._loop is None:
+                loop = policy.new_event_loop()
+                policy.set_event_loop(loop)
+            else:
+                loop = policy._local._loop
         return loop
 
     # Use module level _current_tasks, all_tasks and patch run method.
