@@ -104,6 +104,18 @@ class NestTest(unittest.TestCase):
         result = self.loop.run_until_complete(coro())
         self.assertEqual(result, 42)
 
+    def test_run_close(self):
+        async def get_loop():
+            return asyncio.get_running_loop()
+        run_loop = asyncio.run(get_loop())
+        assert run_loop is not self.loop
+        assert run_loop._closed
+        assert not self.loop._closed
+        nested_run_loop = self.loop.run_until_complete(get_loop())
+        assert nested_run_loop is self.loop
+        assert not self.loop._closed
+
+
 
 if __name__ == '__main__':
     unittest.main()
