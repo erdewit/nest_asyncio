@@ -106,7 +106,7 @@ class NestTest(unittest.TestCase):
 
     def test_run_close(self):
         async def get_loop():
-            return asyncio.get_running_loop()
+            return asyncio.get_event_loop()
         run_loop = asyncio.run(get_loop())
         assert run_loop is not self.loop
         assert run_loop._closed
