@@ -116,7 +116,18 @@ def _patch_loop(loop):
                 break
             handle = ready.popleft()
             if not handle._cancelled:
-                handle._run()
+                try:
+                    # preempt the current task, could be an unpatched task
+                    # i.e., asyncio._leave_task(loop, tsk) with no checks
+                    tsk = asyncio.tasks._current_tasks.pop(loop, None)
+                    handle._run()
+                finally:
+                    # i.e., asyncio._enter_task(loop, tsk) with no checks
+                    if tsk is not None:
+                        asyncio.tasks._current_tasks[loop] = tsk
+                    else:
+                        asyncio.tasks._current_tasks.pop(loop, None)
+
         handle = None
 
     @contextmanager
