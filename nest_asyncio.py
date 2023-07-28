@@ -24,12 +24,7 @@ def _patch_asyncio():
     """Patch asyncio module to use pure Python tasks and futures."""
 
     def run(main, *, debug=False):
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            _patch_loop(loop)
+        loop = asyncio.get_event_loop()
         loop.set_debug(debug)
         task = asyncio.ensure_future(main)
         try:
