@@ -2,13 +2,17 @@ name: nest_asyncio
 
 on: [ push, pull_request, workflow_dispatch ]
 
+env:
+  FORCE_COLOR: 1
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [ 3.5, 3.6, 3.7, 3.8, 3.9, "3.10", "3.11", pypy-3.9 ]
+        python-version: [ 3.5, 3.6, 3.7, 3.8, 3.9, "3.10", "3.11", "3.12", pypy-3.9 ]
         exclude:
           - os: ubuntu-latest
             python-version: 3.5
@@ -21,11 +25,12 @@ jobs:
             python-version: 3.6
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
 
       - name: Install dependencies
         run: |
