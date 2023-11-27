@@ -41,7 +41,7 @@ Loops from other projects, such as uvloop or quamash,
 generally can't be patched.
 
 
-.. |Build| image:: https://github.com/erdewit/nest_asyncio/workflows/Test/badge.svg?branche=master
+.. |Build| image:: https://github.com/erdewit/nest_asyncio/actions/workflows/test.yml/badge.svg?branche=master
    :alt: Build
    :target: https://github.com/erdewit/nest_asyncio/actions
 
