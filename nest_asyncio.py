@@ -138,7 +138,6 @@ def _patch_loop(loop):
 
         handle = None
 
-
     @contextmanager
     def manage_run(self):
         """Set up the loop for running."""
