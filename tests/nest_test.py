@@ -2,7 +2,7 @@ import asyncio
 import sys
 import unittest
 
-import nest_asyncio
+from nest_asyncio import NestedAsyncIO
 
 
 def exception_handler(loop, context):
@@ -12,12 +12,13 @@ def exception_handler(loop, context):
 class NestTest(unittest.TestCase):
     def setUp(self):
         self.loop = asyncio.new_event_loop()
-        nest_asyncio.apply(self.loop)
+        NestedAsyncIO().apply(self.loop)
         asyncio.set_event_loop(self.loop)
         self.loop.set_debug(True)
         self.loop.set_exception_handler(exception_handler)
 
     def tearDown(self):
+        NestedAsyncIO().revert()
         self.assertIsNone(asyncio._get_running_loop())
         self.loop.close()
         del self.loop
@@ -27,7 +28,6 @@ class NestTest(unittest.TestCase):
         return 42
 
     def test_nesting(self):
-
         async def f1():
             result = self.loop.run_until_complete(self.coro())
             self.assertEqual(result, await self.coro())
@@ -42,7 +42,6 @@ class NestTest(unittest.TestCase):
         self.assertEqual(result, 42)
 
     def test_ensure_future_with_run_until_complete(self):
-
         async def f():
             task = asyncio.ensure_future(self.coro())
             return self.loop.run_until_complete(task)
@@ -51,7 +50,6 @@ class NestTest(unittest.TestCase):
         self.assertEqual(result, 42)
 
     def test_ensure_future_with_run_until_complete_with_wait(self):
-
         async def f():
             task = asyncio.ensure_future(self.coro())
             done, pending = self.loop.run_until_complete(
@@ -63,7 +61,6 @@ class NestTest(unittest.TestCase):
         self.assertEqual(result, 42)
 
     def test_timeout(self):
-
         async def f1():
             await asyncio.sleep(0.1)
 
@@ -74,7 +71,6 @@ class NestTest(unittest.TestCase):
             self.loop.run_until_complete(f2())
 
     def test_two_run_until_completes_in_one_outer_loop(self):
-
         async def f1():
             self.loop.run_until_complete(asyncio.sleep(0.02))
             return 4

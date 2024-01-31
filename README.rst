@@ -5,15 +5,15 @@ Introduction
 
 By design asyncio `does not allow <https://github.com/python/cpython/issues/66435>`_
 its event loop to be nested. This presents a practical problem:
-When in an environment where the event loop is
-already running it's impossible to run tasks and wait
-for the result. Trying to do so will give the error
+in an environment where the event loop is
+already running, it's impossible to run tasks and wait
+for the result. Attempting to do so will lead to a
 "``RuntimeError: This event loop is already running``".
 
-The issue pops up in various environments, such as web servers,
+This issue pops up in various environments, including web servers,
 GUI applications and in Jupyter notebooks.
 
-This module patches asyncio to allow nested use of ``asyncio.run`` and
+This module patches asyncio to enable nested usage of ``asyncio.run`` and
 ``loop.run_until_complete``.
 
 Installation
@@ -30,15 +30,20 @@ Usage
 
 .. code-block:: python
 
-    import nest_asyncio
-    nest_asyncio.apply()
+    from nest_asyncio import NestedAsyncIO
+    with NestedAsyncIO():
+        ...
 
-Optionally the specific loop that needs patching can be given
-as argument to ``apply``, otherwise the current event loop is used.
-An event loop can be patched whether it is already running
-or not. Only event loops from asyncio can be patched;
-Loops from other projects, such as uvloop or quamash,
-generally can't be patched.
+
+Wrap any code requiring nested runs with a ``NestedAsyncIO``
+context manager or manually call ``apply`` and ``revert`` on
+demand. Optionally, a specific loop may be supplied as an
+as argument to ``apply`` or the constructor if you do not
+wish to patch the the current event loop. An event loop
+may be patched regardless of its state, running
+or stopped. Note that this packages is limited to ``asyncio``
+event loops: general loops from other projects, such as
+``uvloop`` or ``quamash``, cannot be patched.
 
 
 .. |Build| image:: https://github.com/erdewit/nest_asyncio/actions/workflows/test.yml/badge.svg?branche=master
