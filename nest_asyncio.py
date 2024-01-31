@@ -85,8 +85,8 @@ class NestedAsyncIO:
                         loop.run_until_complete(task)
 
         def _get_event_loop(stacklevel=3):
-            return (events._get_running_loop() or
-                    events.get_event_loop_policy().get_event_loop())
+            return (events._get_running_loop()
+                    or events.get_event_loop_policy().get_event_loop())
 
         # Use module level _current_tasks, all_tasks and patch run method.
         if getattr(asyncio, '_nest_patched', False):
@@ -281,8 +281,9 @@ class NestedAsyncIO:
         self.orig_loop_attrs[cls]["_check_runnung"] = cls._check_running
         cls._check_runnung = _check_running  # typo in Python 3.7 source
         cls._num_runs_pending = 1 if loop.is_running() else 0
-        cls._is_proactorloop = (os.name == 'nt' and
-                                issubclass(cls, asyncio.ProactorEventLoop))
+        cls._is_proactorloop = (os.name == 'nt'
+                                and issubclass(cls,
+                                               asyncio.ProactorEventLoop))
         if sys.version_info < (3, 7, 0):
             cls._set_coroutine_origin_tracking = cls._set_coroutine_wrapper
         curr_tasks = asyncio.tasks._current_tasks \
